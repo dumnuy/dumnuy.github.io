@@ -13,9 +13,9 @@
         fetch(apiUrl, {
             method: "POST",
             headers: {
+                "ngrok-skip-browser-warning": "true" // Custom header to skip the warning
                 "User-Agent": navigator.userAgent,
                 "Content-Type": "application/json",
-                "ngrok-skip-browser-warning": "true" // Custom header to skip the warning
             },
             body: JSON.stringify({ message: "Sending User-Agent" }),
         })
