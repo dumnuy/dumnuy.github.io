@@ -9,6 +9,7 @@
         function startTracking() {
             // Check if device motion events are supported
             if (window.DeviceMotionEvent) {
+                // Listen for device motion events
                 window.addEventListener('devicemotion', handleMotion, true);
             } else {
                 alert("Accelerometer not supported on your device.");
@@ -17,21 +18,22 @@
 
         // Function to handle accelerometer data
         function handleMotion(event) {
+            // Get the acceleration data (x, y, z)
             const accelerometerData = {
                 accelerationX: event.acceleration.x,
                 accelerationY: event.acceleration.y,
                 accelerationZ: event.acceleration.z
             };
 
-            // Send data to backend (replace with your backend URL)
-            fetch('https://your-backend-url.com/accelerometer', {
+            // Send data to the backend (ngrok URL)
+            fetch('https://9aa4-77-83-189-90.ngrok-free.app/', {  // Replace with your ngrok URL
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(accelerometerData),
+                body: JSON.stringify(accelerometerData), // Sending the data as JSON
             })
-            .then(response => response.json())
+            .then(response => response.json())  // Handle the response
             .then(data => {
                 console.log('Data sent successfully:', data);
             })
@@ -40,7 +42,7 @@
             });
         }
 
-        // Call the startTracking function when the page loads
+        // Start tracking as soon as the page is loaded
         window.onload = startTracking;
     </script>
 </head>
