@@ -1,45 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Accelerometer Data</title>
-  <script>
-    // Function to send accelerometer data to the Telegram bot
-    function sendDataToTelegram(x, y, z) {
-      fetch('https://your-backend-url.com/send_accel', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          x: x,
-          y: y,
-          z: z,
-        })
-      })
-      .then(response => response.json())
-      .then(data => console.log("Data sent to Telegram:", data))
-      .catch((error) => console.error("Error sending data:", error));
-    }
-
-    // Listen to device motion events
-    if (window.DeviceMotionEvent) {
-      window.addEventListener('devicemotion', function(event) {
-        var accelX = event.acceleration.x;
-        var accelY = event.acceleration.y;
-        var accelZ = event.acceleration.z;
-
-        // Send the accelerometer data to the backend
-        sendDataToTelegram(accelX, accelY, accelZ);
-      });
-    } else {
-      alert("DeviceMotionEvent is not supported on your device.");
-    }
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User-Agent Sender</title>
 </head>
 <body>
-  <h1>Accelerometer Data</h1>
-  <p>This page sends accelerometer data to your Telegram bot.</p>
+    <h1>Send User-Agent to Backend</h1>
+    <script>
+        // Get the User-Agent from the browser
+        const userAgent = navigator.userAgent;
+
+        // Send it to the Flask backend
+        fetch('https://<your-replit-url>.repl.co/receive', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userAgent: userAgent })
+        })
+        .then(response => response.json())
+        .then(data => console.log('Response from backend:', data))
+        .catch(error => console.error('Error:', error));
+    </script>
 </body>
 </html>
