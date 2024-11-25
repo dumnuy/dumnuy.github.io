@@ -3,25 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User-Agent Sender</title>
+    <title>Telegram Mini App - Accelerometer</title>
+    <script>
+        // Function to start reading accelerometer data
+        function startTracking() {
+            // Check if device motion events are supported
+            if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', handleMotion, true);
+            } else {
+                alert("Accelerometer not supported on your device.");
+            }
+        }
+
+        // Function to handle accelerometer data
+        function handleMotion(event) {
+            const accelerometerData = {
+                accelerationX: event.acceleration.x,
+                accelerationY: event.acceleration.y,
+                accelerationZ: event.acceleration.z
+            };
+
+            // Send data to backend (replace with your backend URL)
+            fetch('https://your-backend-url.com/accelerometer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(accelerometerData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Data sent successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error sending data:', error);
+            });
+        }
+
+        // Call the startTracking function when the page loads
+        window.onload = startTracking;
+    </script>
 </head>
 <body>
-    <h1>Send User-Agent to Backend</h1>
-    <script>
-        // Get the User-Agent from the browser
-        const userAgent = navigator.userAgent;
-
-        // Send it to the Flask backend
-        fetch('https://<your-replit-url>.repl.co/receive', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userAgent: userAgent })
-        })
-        .then(response => response.json())
-        .then(data => console.log('Response from backend:', data))
-        .catch(error => console.error('Error:', error));
-    </script>
+    <h1>Accelerometer Data</h1>
+    <p>Accelerometer data is being sent to the server...</p>
 </body>
 </html>
