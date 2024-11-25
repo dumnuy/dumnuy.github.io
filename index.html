@@ -1,35 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Accelerometer Data</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accelerometer Data</title>
+  <script>
+    // Function to send accelerometer data to the Telegram bot
+    function sendDataToTelegram(x, y, z) {
+      fetch('https://your-backend-url.com/send_accel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          x: x,
+          y: y,
+          z: z,
+        })
+      })
+      .then(response => response.json())
+      .then(data => console.log("Data sent to Telegram:", data))
+      .catch((error) => console.error("Error sending data:", error));
+    }
+
+    // Listen to device motion events
+    if (window.DeviceMotionEvent) {
+      window.addEventListener('devicemotion', function(event) {
+        var accelX = event.acceleration.x;
+        var accelY = event.acceleration.y;
+        var accelZ = event.acceleration.z;
+
+        // Send the accelerometer data to the backend
+        sendDataToTelegram(accelX, accelY, accelZ);
+      });
+    } else {
+      alert("DeviceMotionEvent is not supported on your device.");
+    }
+  </script>
 </head>
 <body>
-    <h1>Accelerometer Info</h1>
-    <p id="acceleration">Waiting for data...</p>
-    <script>
-        // Check if Device Motion is supported
-        if (window.DeviceMotionEvent) {
-            window.addEventListener("devicemotion", function (event) {
-                const acceleration = event.acceleration;
-                if (acceleration) {
-                    const data = `
-                        X: ${acceleration.x.toFixed(2)} m/s²<br>
-                        Y: ${acceleration.y.toFixed(2)} m/s²<br>
-                        Z: ${acceleration.z.toFixed(2)} m/s²
-                    `;
-                    document.getElementById('acceleration').innerHTML = data;
-
-                    // Optionally send this data to your bot or server
-                    // fetch('YOUR_SERVER_URL', {
-                    //     method: 'POST',
-                    //     headers: { 'Content-Type': 'application/json' },
-                    //     body: JSON.stringify({ x: acceleration.x, y: acceleration.y, z: acceleration.z })
-                    // });
-                }
-            });
-        } else {
-            document.getElementById('acceleration').innerText = "Device Motion not supported.";
-        }
-    </script>
+  <h1>Accelerometer Data</h1>
+  <p>This page sends accelerometer data to your Telegram bot.</p>
 </body>
 </html>
