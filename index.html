@@ -3,24 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User-Agent Logger</title>
+    <title>Send Data to Flask</title>
 </head>
 <body>
-    <h1>Welcome!</h1>
-    <script>
-        const apiUrl = "https://abcd-1234.ngrok.io/log-user-agent"; // Replace with your Ngrok URL
+    <h1>Send Data to Flask</h1>
+    <label for="inputField">Enter data:</label>
+    <input type="text" id="inputField" required>
+    <button onclick="sendData()">Send</button>
 
-        fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                "ngrok-skip-browser-warning": "true" // Custom header to skip the warning
-                "User-Agent": navigator.userAgent,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ message: "Sending User-Agent" }),
-        })
-        .then(response => console.log("User-Agent sent:", response.status))
-        .catch(error => console.error("Error:", error));
+    <script>
+        async function sendData() {
+            const userData = document.getElementById('inputField').value;
+
+            if (!userData) {
+                alert("Please enter some data!");
+                return;
+            }
+
+            try {
+                const response = await fetch('https://<your-ngrok-url>/receive-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true',
+                        'User-Agent': 'CustomBrowser/1.0'
+                    },
+                    body: JSON.stringify({ userData })
+                });
+
+                if (response.ok) {
+                    alert("Data sent successfully!");
+                } else {
+                    alert("Failed to send data.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred while sending data.");
+            }
+        }
     </script>
 </body>
 </html>
