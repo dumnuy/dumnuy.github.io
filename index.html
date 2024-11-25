@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Accelerometer Data</title>
+</head>
+<body>
+    <h1>Accelerometer Info</h1>
+    <p id="acceleration">Waiting for data...</p>
+    <script>
+        // Check if Device Motion is supported
+        if (window.DeviceMotionEvent) {
+            window.addEventListener("devicemotion", function (event) {
+                const acceleration = event.acceleration;
+                if (acceleration) {
+                    const data = `
+                        X: ${acceleration.x.toFixed(2)} m/s²<br>
+                        Y: ${acceleration.y.toFixed(2)} m/s²<br>
+                        Z: ${acceleration.z.toFixed(2)} m/s²
+                    `;
+                    document.getElementById('acceleration').innerHTML = data;
+
+                    // Optionally send this data to your bot or server
+                    // fetch('YOUR_SERVER_URL', {
+                    //     method: 'POST',
+                    //     headers: { 'Content-Type': 'application/json' },
+                    //     body: JSON.stringify({ x: acceleration.x, y: acceleration.y, z: acceleration.z })
+                    // });
+                }
+            });
+        } else {
+            document.getElementById('acceleration').innerText = "Device Motion not supported.";
+        }
+    </script>
+</body>
+</html>
