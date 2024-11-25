@@ -3,38 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Data to Flask</title>
+    <title>Input Form</title>
 </head>
 <body>
-    <h1>Enter Some Data</h1>
+    <h1>Send Data to Flask</h1>
     <form id="dataForm">
-        <input type="text" id="userData" name="userData" placeholder="Enter data" required>
+        <label for="input_data">Enter something:</label>
+        <input type="text" id="input_data" name="input_data" required>
         <button type="submit">Submit</button>
     </form>
-    <p id="responseMessage"></p>
 
     <script>
-        document.getElementById("dataForm").addEventListener("submit", function(event) {
+        document.getElementById('dataForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const data = document.getElementById("userData").value;
 
-            fetch("https://0b8b-77-83-189-90.ngrok-free.app", { // Replace with your ngrok URL
-                method: "POST",
+            var inputData = document.getElementById('input_data').value;
+            fetch(' https://0b8b-77-83-189-90.ngrok-free.app', {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/json",
-                    "ngrok-skip-browser-warning": "true"
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'ngrok-skip-browser-warning': 'true'
                 },
-                body: JSON.stringify({ userData: data })
+                body: `input_data=${inputData}`
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("responseMessage").textContent = "Server response: " + data.message;
-                console.log("Success:", data);
+                console.log(data);
+                alert(data.message);
             })
-            .catch(error => {
-                document.getElementById("responseMessage").textContent = "Error: Could not send data.";
-                console.error("Error:", error);
-            });
+            .catch(error => console.error('Error:', error));
         });
     </script>
 </body>
