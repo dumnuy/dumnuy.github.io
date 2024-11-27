@@ -3,36 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Form</title>
+    <title>Telegram Gyroscope App</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .gyro-data {
+            text-align: center;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-    <h1>Send Data to Flask</h1>
-    <form id="dataForm">
-        <label for="input_data">Enter something:</label>
-        <input type="text" id="input_data" name="input_data" required>
-        <button type="submit">Submit</button>
-    </form>
+    <div class="gyro-data">
+        <h1>Gyroscope Data</h1>
+        <p id="alpha">Alpha: --</p>
+        <p id="beta">Beta: --</p>
+        <p id="gamma">Gamma: --</p>
+    </div>
 
     <script>
-        document.getElementById('dataForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            var inputData = document.getElementById('input_data').value;
-            fetch(' https://0b8b-77-83-189-90.ngrok-free.app', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'ngrok-skip-browser-warning': 'true'
-                },
-                body: `input_data=${inputData}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                alert(data.message);
-            })
-            .catch(error => console.error('Error:', error));
-        });
+        // Check if gyroscope events are supported
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener('deviceorientation', (event) => {
+                document.getElementById('alpha').textContent = `Alpha: ${event.alpha.toFixed(2)}`;
+                document.getElementById('beta').textContent = `Beta: ${event.beta.toFixed(2)}`;
+                document.getElementById('gamma').textContent = `Gamma: ${event.gamma.toFixed(2)}`;
+            });
+        } else {
+            alert('Gyroscope not supported on your device or browser.');
+        }
     </script>
 </body>
 </html>
