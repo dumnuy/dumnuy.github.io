@@ -1,48 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Gyroscope App</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
-        .gyro-data {
-            text-align: center;
-            background: white;
-            border: 1px solid #ccc;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <title>Gyroscope Data</title>
 </head>
 <body>
-    <div class="gyro-data">
-        <h1>Gyroscope Data</h1>
-        <p id="alpha">Alpha: --</p>
-        <p id="beta">Beta: --</p>
-        <p id="gamma">Gamma: --</p>
-    </div>
-
-    <script>
-        // Check if gyroscope events are supported
-        if (window.DeviceOrientationEvent) {
-            window.addEventListener('deviceorientation', (event) => {
-                document.getElementById('alpha').textContent = `Alpha: ${event.alpha.toFixed(2)}`;
-                document.getElementById('beta').textContent = `Beta: ${event.beta.toFixed(2)}`;
-                document.getElementById('gamma').textContent = `Gamma: ${event.gamma.toFixed(2)}`;
+  <h1>Gyroscope Data</h1>
+  <div id="output"></div>
+  <script>
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      // For iOS 13+ where permissions are required
+      DeviceMotionEvent.requestPermission()
+        .then(permissionState => {
+          if (permissionState === 'granted') {
+            window.addEventListener('devicemotion', event => {
+              const output = document.getElementById('output');
+              const rotationRate = event.rotationRate;
+              if (rotationRate) {
+                output.innerHTML = `
+                  Alpha: ${rotationRate.alpha}<br>
+                  Beta: ${rotationRate.beta}<br>
+                  Gamma: ${rotationRate.gamma}
+                `;
+              } else {
+                output.innerHTML = "Gyroscope data not available.";
+              }
             });
-        } else {
-            alert('Gyroscope not supported on your device or browser.');
-        }
-    </script>
+          } else {
+            alert('Permission to access gyroscope denied.');
+          }
+        })
+        .catch(console.error);
+    } else {
+      // Older devices or non-iOS devices
+      window.addEventListener('devicemotion', event => {
+        console.log(event.rotationRate);
+      });
+    }
+  </script>
 </body>
 </html>
