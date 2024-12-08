@@ -1,162 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Telegram Mini Apps Vanilla JS Sample App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Data Form</title>
     <style>
         body {
-            --bg-color: var(--tg-theme-bg-color);
-            font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--tg-theme-text-color);
-            margin: 48px 24px;
-            padding: 0;
-            color-scheme: var(--tg-color-scheme);
+            font-family: Arial, sans-serif;
+            padding: 20px;
         }
-
-        a {
-            color: var(--tg-theme-link-color);
+        header {
+            margin-bottom: 20px;
         }
-        #viewport {
+        input, button {
+            margin: 10px 0;
+            padding: 8px;
+            font-size: 16px;
+        }
+        #user-list {
+            margin-top: 20px;
+        }
+        .user-item {
+            margin-bottom: 10px;
+        }
+        .user-item button {
+            margin-left: 10px;
+        }
+        /* Modal Styles */
+        .modal {
+            display: none;
             position: fixed;
+            z-index: 1;
             left: 0;
-            right: 0;
             top: 0;
-            height: var(--tg-viewport-stable-height, 100vh);
-            pointer-events: none;
-            transition: all .2s ease;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
         }
-        #viewport:after {
-            content: '';
-            display: block;
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            border-width: 4px;
-            border-style: solid;
-            border-image: linear-gradient(45deg, rgba(64, 224, 208, .5), rgba(173, 255, 47, .5)) 1;
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
         }
-
-        #viewport-params-size,
-        #viewport-params-expand {
-            content: attr(text);
-            position: absolute;
-            display: inline-block;
-            background: var(--tg-theme-link-color, rgb(64, 224, 208));
-            right: 4px;
-            left: auto;
-            font-size: 8px;
-            padding: 4px;
-            vertical-align: top;
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
         }
-        #viewport-params-size {
-            top: 4px;
-        }
-        #viewport-params-expand {
-            top: 30px;
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
         }
     </style>
 </head>
-
 <body>
-    <main>
-        <div align="center">
-            <a href="https://ton.org/"><img width="48" src="./assets/tapps.png" alt="logo of telegram web apps"></a>
+
+    <header>
+        <h1>Enter User Data</h1>
+        <label for="name">Name:</label>
+        <input type="text" id="name" placeholder="Enter name"><br>
+        <label for="date">Date:</label>
+        <input type="date" id="date"><br>
+        <button onclick="saveUserData()">Save</button>
+    </header>
+
+    <section id="user-list">
+        <h2>Saved Users</h2>
+        <div id="user-items"></div>
+    </section>
+
+    <!-- Modal for Editing User -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Edit User</h2>
+            <label for="edit-name">Name:</label>
+            <input type="text" id="edit-name"><br>
+            <label for="edit-date">Date:</label>
+            <input type="date" id="edit-date"><br>
+            <button onclick="saveEditedUser()">Save Changes</button>
         </div>
-        <h1>Modals</h1>
-        <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
-        <button onclick="showPopup();">Launch Popup</button>
+    </div>
 
-        <h1>Links</h1>
-        <ul>
-            <li>
-                <a href="javascript:Telegram.WebApp.openTelegramLink('https://t.me/trendingapps');">Open link within Telegram</a>
-            </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://ton.org/');">Open link in external browser</a>
-            </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://telegra.ph/api',{try_instant_view:true});">Open link inside Telegram webview</a>
-            </li>
-        </ul>
+    <!-- Download JSON Button -->
+    <button onclick="downloadJSON()">Download JSON</button>
 
-        <h1>Buttons</h1>
-        <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
-        <button onclick="toggleMainButton();">Toggle Main Button</button>
-    </main>
-    <div id="viewport"></div>
-    <div id="viewport-params-size"></div>
-    <div id="viewport-params-expand"></div>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // Init TWA
-        Telegram.WebApp.ready();
+        let editingIndex = null;  // To keep track of which user is being edited
 
-        // Event occurs whenever theme settings are changed in the user's Telegram app (including switching to night mode).
-        Telegram.WebApp.onEvent('themeChanged', function() {
-            document.documentElement.className = Telegram.WebApp.colorScheme;
-        });
-
-        // Show main button
-        Telegram.WebApp.MainButton.setParams({
-            text: 'Main Button'
-        });
-        Telegram.WebApp.MainButton.onClick(function () {
-            Telegram.WebApp.showAlert('Main Button was clicked')
-        });	
-        Telegram.WebApp.MainButton.show();
-
-        // Function to call showPopup API
-        function showPopup() {
-            Telegram.WebApp.showPopup({
-                title: 'Title',
-                message: 'Some message',
-                buttons: [
-                    {id: 'link', type: 'default', text: 'Open ton.org'},
-                    {type: 'cancel'},
-                ]
-            }, function(btn) {
-                if (btn === 'link') {
-                    Telegram.WebApp.openLink('https://ton.org/');
-                }
-            });
-        };
-
-        // Function to toggle main TWA button
-        function toggleMainButton() {
-            if (Telegram.WebApp.MainButton.isVisible) {
-                Telegram.WebApp.MainButton.hide();
-            } else {
-                Telegram.WebApp.MainButton.show();
-            }
-        };
-
-        function setViewportData() {
-            var sizeEl = document.getElementById('viewport-params-size');
-            sizeEl.innerText = 'width: ' + window.innerWidth + ' x ' + 
-                'height: ' + Telegram.WebApp.viewportStableHeight;
-
-            var expandEl = document.querySelector('#viewport-params-expand');
-            expandEl.innerText = 'Is Expanded: ' + (Telegram.WebApp.isExpanded ? 'true' : 'false');
+        // Load saved user data from localStorage when the page loads
+        window.onload = function() {
+            displayUsers();
         }
 
-        Telegram.WebApp.setHeaderColor('secondary_bg_color');
+        function saveUserData() {
+            const name = document.getElementById('name').value;
+            const date = document.getElementById('date').value;
 
-        setViewportData();
-        Telegram.WebApp.onEvent('viewportChanged', setViewportData);
+            if (name && date) {
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                users.push({ name, date });
+                localStorage.setItem('users', JSON.stringify(users));
 
-        Telegram.WebApp.onEvent('themeChanged', function() {
-            document.body.setAttribute('style', '--bg-color:' + Telegram.WebApp.backgroundColor);
-        });
+                // Clear the input fields
+                document.getElementById('name').value = '';
+                document.getElementById('date').value = '';
 
+                displayUsers();
+            } else {
+                alert('Please enter both name and date.');
+            }
+        }
+
+        function displayUsers() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Sort users by date (ascending order)
+            users.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const userItems = document.getElementById('user-items');
+            userItems.innerHTML = '';
+
+            users.forEach((user, index) => {
+                const userDiv = document.createElement('div');
+                userDiv.classList.add('user-item');
+                userDiv.innerHTML = `
+                    <span><strong>${user.name}</strong> - ${user.date}</span>
+                    <button onclick="editUser(${index})">Edit</button>
+                    <button onclick="moveUser(${index})">Move</button>
+                    <button onclick="deleteUser(${index})">Delete</button>
+                `;
+                userItems.appendChild(userDiv);
+            });
+        }
+
+        // Move logic
+        function moveUser(index) {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+
+            if (index < users.length - 1) {
+                // Swap dates between the selected user and the next user
+                const temp = users[index].date;
+                users[index].date = users[index + 1].date;
+                users[index + 1].date = temp;
+
+                // Update the localStorage with the new order
+                localStorage.setItem('users', JSON.stringify(users));
+
+                // Refresh the user list display
+                displayUsers();
+            } else {
+                alert('No next user to swap with.');
+            }
+        }
+
+        // Delete logic
+        function deleteUser(index) {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            // Remove the user from the array
+            users.splice(index, 1);
+            // Update the localStorage
+            localStorage.setItem('users', JSON.stringify(users));
+            // Refresh the user list display
+            displayUsers();
+        }
+
+        // Edit user logic
+        function editUser(index) {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users[index];
+            
+            // Populate the modal with user data
+            document.getElementById('edit-name').value = user.name;
+            document.getElementById('edit-date').value = user.date;
+
+            // Set the index of the user being edited
+            editingIndex = index;
+
+            // Show the modal
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Save edited user
+        function saveEditedUser() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const updatedName = document.getElementById('edit-name').value;
+            const updatedDate = document.getElementById('edit-date').value;
+
+            if (updatedName && updatedDate) {
+                // Update the user data
+                users[editingIndex].name = updatedName;
+                users[editingIndex].date = updatedDate;
+
+                // Update localStorage
+                localStorage.setItem('users', JSON.stringify(users));
+
+                // Close the modal and refresh the user list
+                closeModal();
+                displayUsers();
+            } else {
+                alert('Please fill in both name and date.');
+            }
+        }
+
+        // Close the modal
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // To close the modal when clicking outside the modal content
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('editModal')) {
+                closeModal();
+            }
+        }
+
+        // Download JSON file
+        function downloadJSON() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const blob = new Blob([JSON.stringify(users, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'users_data.json';  // Specify the filename for the download
+            link.click();
+        }
     </script>
 
-    <!-- Eruda is console for mobile browsers -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
 </body>
 </html>
